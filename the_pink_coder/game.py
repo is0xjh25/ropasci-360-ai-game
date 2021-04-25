@@ -1,28 +1,46 @@
 def move(board, index, id):
     
-    action_set = set(slide(board, index) + swing(board, index, id))
-    action_list = list(action_set)
+    action_list = []
+    list_1 = slide(index)
+    list_2 = swing(board, index, id)
+    tot_list = []
+
+    tot_list += list_1
+    
+    # Extract list elements from list_2
+    for list in list_2:
+        tot_list += list
+
+    # Check duplicate indexes
+    for i in tot_list:
+        if i not in action_list:
+            action_list.append(i)
 
     return action_list
 
 
 def swing(board, index, id):
     
-    possible_trans_index = slide(board, index)
+    possible_trans_index = slide(index)
     trans_index = []
     result_pieces = []
     
-    for i in board[getattr(board, id)]:
-        if i in possible_trans_index:
+    for i in board.board[getattr(board, id)]:
+        if i[1] in possible_trans_index:
             trans_index.append(i)
+    
 
     for i in trans_index:
-        result_pieces.append(slide(i))
+        slide_move = slide(i)
+        # Remove index itself
+        if index[1] in slide_move:
+            slide_move.remove(index[1])
+        result_pieces.append(slide_move)
         
     return result_pieces
 
 
-def slide(board, index):
+def slide(index):
     
     row = index[1][0]
     col = index[1][1]
@@ -72,6 +90,15 @@ def defeat(piece_1, piece_2):
             return False
     else:
         return False
+
+
+def defeat_score(type_1, type_2, factor=1):
+    if ((type_1 == 'r') and (type_2 == 's')) or ((type_1 == 's') and (type_2 == 'p')) or ((type_1 == 'p') and (type_2 == 'r')):
+        return 1*factor
+    elif ((type_1 == 'r') and (type_2 == 'p')) or ((type_1 == 's') and (type_2 == 'r')) or ((type_1== 'p') and (type_2 == 's')):
+        return -1*factor
+    elif ((type_1 == 'r') and (type_2 == 'r')) or ((type_1 == 'p') and (type_2 == 'p')) or ((type_1 == 's') and (type_2 == 's')):
+        return 0
 
  
 # Get coordinates from one piece, piece = ('r',(0,1))
