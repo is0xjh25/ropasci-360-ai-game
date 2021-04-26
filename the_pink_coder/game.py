@@ -20,7 +20,7 @@ def move(board, index, id):
 
 
 def swing(board, index, id):
-    
+    # print(id)
     possible_trans_index = slide(index)
     trans_index = []
     result_pieces = []
@@ -92,7 +92,7 @@ def defeat(piece_1, piece_2):
         return False
 
 
-def defeat_score(type_1, type_2, factor=1):
+def defeat_score(type_1, type_2, factor):
     if ((type_1 == 'r') and (type_2 == 's')) or ((type_1 == 's') and (type_2 == 'p')) or ((type_1 == 'p') and (type_2 == 'r')):
         return 1*factor
     elif ((type_1 == 'r') and (type_2 == 'p')) or ((type_1 == 's') and (type_2 == 'r')) or ((type_1== 'p') and (type_2 == 's')):

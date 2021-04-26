@@ -9,7 +9,7 @@ class Board:
         self.board = board
 
 
-    def update_board(self, ally_action, oppo_action):
+    def update_board(self, oppo_action, ally_action):
         
         # Update ally action
         id = getattr(self, "ally")
@@ -21,15 +21,18 @@ class Board:
             else:
                 for piece in self.board[id]:
                     index = piece[1]
-                    if index == action[2]:
-                        new_piece = [piece[0],(action[1][0], action[1][1])]
+                    if index == action[1]:
+                        new_piece = [piece[0],(action[2][0], action[2][1])]
                         self.board[id].remove(piece)
                         self.board[id].append(new_piece)
+                        break
+                        
             
             # Update opponent action
             id = getattr(self, "oppo")
             action = oppo_action
-        
+
+
         # Update combat result
         tokens = self.board["upper"] + self.board["lower"]
         
@@ -53,13 +56,27 @@ class Board:
     def evaluation(self):   
         
         score = 0
-        score += len(self.board[self.ally])
-        score -= len(self.board[self.oppo])
+        # score += len(self.board[self.ally])
+        # score -= len(self.board[self.oppo])
 
         for i in self.board[self.ally]:
             for j in self.board[self.oppo]: 
                 score += game.defeat_score(i[0], j[0], (9 - self.distance(i, j)))
-            
+        # print(self.board)
+        if len(self.board[self.oppo]) == 0:
+            score = score / (len(self.board[self.ally]))
+        elif len(self.board[self.ally]) == 0:
+            score = score / (len(self.board[self.oppo]))
+        else:
+            score = score / (len(self.board[self.ally])*len(self.board[self.oppo]))
         return score
 
+
+def get_closest_defeated_index(self, upper_index, board):
+        distance = float('inf');
+        cloest_index = None;
+        for j in board[self.game.enemy]:
+            if self.game.defeated(upper_index, j) is 'win' and dist(upper_index,j)<distance:
+                cloest_index = j
+        return cloest_index
 

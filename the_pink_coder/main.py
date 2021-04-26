@@ -6,6 +6,15 @@ def main():
     # print(player.possible_throw_position)
     player1.update(player1.action(),("THROW","r",(-4,0)))
     player1.update(player1.action(),("THROW","p",(-3,0)))
+    player1.update(player1.action(),("THROW","p",(-3,0)))
+    player1.update(player1.action(),("THROW","p",(-3,0)))
+    player1.update(player1.action(),("THROW","p",(-3,0)))
+
+    player1.update(player1.action(),("THROW","p",(-3,0)))
+    player1.update(player1.action(),("THROW","p",(-3,0)))
+    player1.update(player1.action(),("THROW","p",(-3,0)))
+    player1.update(player1.action(),("THROW","p",(-3,0)))
+    print(player1.action())
     
     # print(player.board)
     

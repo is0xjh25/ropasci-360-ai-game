@@ -2,6 +2,7 @@ import the_pink_coder.gametheory as gt
 import the_pink_coder.game as game
 import the_pink_coder.board as board
 from copy import deepcopy
+import random
 
 class Player:
     
@@ -11,7 +12,7 @@ class Player:
         if self.ally == "upper":
             self.oppo = "lower"
         else:
-            self.oppo = "lower"
+            self.oppo = "upper"
         
         self.board = board.Board(self.ally, self.oppo)
         self.ally_throw_remain = 9
@@ -22,9 +23,10 @@ class Player:
         self.type = ["r", "p", "s"]
         self.all_index = {4: (-4, 0), 3: (-4, 1), 2: (-4, 2), 1: (-4, 3), 0: (-4, 4), -1: (-3, 4), -2: (-2, 4), -3: (-1, 4), -4: (0, 4)}
 
+        self.history_action = []
+
 
     def action(self):
-       
         self.update_available_throw()
 
         possible_ally_actions = self.get_actions("ally")
@@ -33,41 +35,41 @@ class Player:
 
         # Round Increament
         self.round += 1
-       
-        best_action = self.generate_best_action(possible_ally_actions, possible_oppo_actions)
 
+        best_action = self.generate_best_action(possible_ally_actions, possible_oppo_actions)
         return best_action
 
     
-    def update(self, ally_action, oppo_action):
+    def update(self, oppo_action, ally_action):
 
         if ally_action[0] == "THROW":
             self.ally_throw_remain -= 1
         if oppo_action[0] == "THROW":
             self.oppo_throw_remain -= 1
         
-        self.board.update_board(ally_action, oppo_action)
+        self.board.update_board(oppo_action, ally_action)
 
 
     def generate_best_action(self, possible_ally_actions, possible_oppo_actions):
         
-        matrix = []
+        # matrix = []
 
-        for ally_action in possible_ally_actions:
+        # for ally_action in possible_ally_actions:
             
-            temp_array = []
+        #     temp_array = []
             
-            for oppo_action in possible_oppo_actions:
-                board = deepcopy(self.board)
-                board.update_board(ally_action, oppo_action)
-                temp_array.append(board.evaluation())
+        #     for oppo_action in possible_oppo_actions:
+        #         board = deepcopy(self.board)
+        #         board.update_board(oppo_action, ally_action, False)
+        #         temp_array.append(board.evaluation())
             
-            matrix.append(temp_array)
-        
-        max_score = (max(gt.solve_game(matrix)[0]))
-        best_action = possible_ally_actions[list(gt.solve_game(matrix)[0]).index(max_score)]
-        print(best_action)
-        
+        #     matrix.append(temp_array)
+        # list_res , expect = gt.solve_game(matrix)
+        # max_score = max(list_res)
+        # best_action = possible_ally_actions[list(list_res).index(max_score)]
+        index = random.randint(0, len(possible_ally_actions)-1)
+        best_action = possible_ally_actions[index]
+        self.history_action.append(best_action)
         return best_action
         
     
@@ -124,9 +126,12 @@ class Player:
 
         for i in all_token:
             action_list = game.move(self.board, i, id)
-            for index in action_list:  
-                possible_move_actions.append((i[0], index, (i[1])))
-
+            slide_move = game.slide(i)
+            for index in action_list: 
+                if index in slide_move: 
+                    possible_move_actions.append(("SLIDE", (i[1]), index))
+                else:
+                    possible_move_actions.append(("SWING", (i[1]), index))
         return possible_move_actions + possible_throw_actions
 
 
