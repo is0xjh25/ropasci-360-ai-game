@@ -27,12 +27,13 @@ class Player:
 
 
     def action(self):
-        self.update_available_throw()
 
-        possible_ally_actions = self.get_actions("ally")
+        self.board.update_available_throw()
+        possible_ally_actions = self.board.get_actions("ally")
 
-        possible_oppo_actions = self.get_actions("oppo")
-
+        possible_oppo_actions = self.board.get_actions("oppo")
+        # print(possible_ally_actions)
+        # print(possible_oppo_actions)
         # Round Increament
         self.round += 1
 
@@ -119,135 +120,131 @@ class Player:
 
         best_action = possible_ally_actions[list(list_res).index(max_score)]
 
-
-
-
-
         return best_action
         
     
 
 
-    def update_available_throw(self):
+    # def update_available_throw(self):
 
-        # Update ally throws
-        id = getattr(self, "ally") 
-        throw = getattr(self, "ally_throw_remain")
-        available_throws = getattr(self, "available_ally_throws")
+    #     # Update ally throws
+    #     id = getattr(self, "ally") 
+    #     throw = getattr(self, "ally_throw_remain")
+    #     available_throws = getattr(self, "available_ally_throws")
 
-        for i in range (0, 2, 1):
-            if throw > 0:
-                if id == "upper":
-                    line = 4 - (9 - throw)
-                    min_Col = self.all_index[line][0]
-                    max_Col = self.all_index[line][1]
-                    if (line, min_Col) in available_throws:
-                        pass
-                    else:
-                        for j in range(min_Col,max_Col+1):
-                            available_throws.append((line, j))
-                else:
-                    line = -4 + (9 - throw)
-                    min_Col = self.all_index[line][0]
-                    max_Col = self.all_index[line][1]
-                    if (line, min_Col) in available_throws:
-                        pass
-                    else:
-                        for j in range(min_Col,max_Col+1):
-                            available_throws.append((line, j))
+    #     for i in range (0, 2, 1):
+    #         if throw > 0:
+    #             if id == "upper":
+    #                 line = 4 - (9 - throw)
+    #                 min_Col = self.all_index[line][0]
+    #                 max_Col = self.all_index[line][1]
+    #                 if (line, min_Col) in available_throws:
+    #                     pass
+    #                 else:
+    #                     for j in range(min_Col,max_Col+1):
+    #                         available_throws.append((line, j))
+    #             else:
+    #                 line = -4 + (9 - throw)
+    #                 min_Col = self.all_index[line][0]
+    #                 max_Col = self.all_index[line][1]
+    #                 if (line, min_Col) in available_throws:
+    #                     pass
+    #                 else:
+    #                     for j in range(min_Col,max_Col+1):
+    #                         available_throws.append((line, j))
             
-            ## Update opponent throws
-            id = getattr(self, "oppo") 
-            throw = getattr(self, "oppo_throw_remain")
-            available_throws = getattr(self, "available_oppo_throws")
+    #         ## Update opponent throws
+    #         id = getattr(self, "oppo") 
+    #         throw = getattr(self, "oppo_throw_remain")
+    #         available_throws = getattr(self, "available_oppo_throws")
 
 
-    def get_actions(self, id):
+    # def get_actions(self, id):
 
-        possible_throw_actions = []
-        possible_move_actions = []
+    #     possible_throw_actions = []
+    #     possible_move_actions = []
 
-        if id == "ally":
-            throw_remain = self.ally_throw_remain
-        elif id == "oppo":
-            throw_remain = self.oppo_throw_remain
+    #     if id == "ally":
+    #         throw_remain = self.ally_throw_remain
+    #     elif id == "oppo":
+    #         throw_remain = self.oppo_throw_remain
 
-        if throw_remain > 0:
-            possible_throw_actions = self.get_throws(id)
+    #     if throw_remain > 0:
+    #         possible_throw_actions = self.get_throws(id)
 
             
-        all_token = self.board.board[getattr(self, id)]
+    #     all_token = self.board.board[getattr(self, id)]
 
-        for i in all_token:
-            action_list = game.move(self.board, i, id)
-            slide_move = game.slide(i)
-            for index in action_list: 
-                if index in slide_move: 
-                    possible_move_actions.append(("SLIDE", (i[1]), index))
-                else:
-                    possible_move_actions.append(("SWING", (i[1]), index))
+    #     for i in all_token:
+    #         action_list = game.move(self.board, i, id)
+    #         slide_move = game.slide(i)
+    #         for index in action_list: 
+    #             if index in slide_move: 
+    #                 possible_move_actions.append(("SLIDE", (i[1]), index))
+    #             else:
+    #                 possible_move_actions.append(("SWING", (i[1]), index))
 
-        current_index = []
-        for piece in self.board.board[self.ally]:
-            current_index.append(piece[1])
+    #     current_index = []
+    #     for piece in self.board.board[self.ally]:
+    #         current_index.append(piece[1])
 
-        for action in possible_move_actions:
-            if action[2] in current_index:
-                possible_move_actions.remove(action)
+    #     for action in possible_move_actions:
+    #         if action[2] in current_index:
+    #             possible_move_actions.remove(action)
         
-        for action in possible_throw_actions:
-            if action[2] in current_index:
-                possible_throw_actions.remove(action)
+    #     for action in possible_throw_actions:
+    #         if action[2] in current_index:
+    #             possible_throw_actions.remove(action)
 
 
 
         
-        return possible_move_actions + possible_throw_actions
+    #     return possible_move_actions + possible_throw_actions
 
 
-    def get_throws(self, id):
+    # def get_throws(self, id):
         
-        possible_throws = []
+    #     possible_throws = []
         
-        if id == "ally":
-            available_throws = self.available_ally_throws
-        elif id == "oppo":
-            available_throws = self.available_oppo_throws
+    #     if id == "ally":
+    #         available_throws = self.available_ally_throws
+    #     elif id == "oppo":
+    #         available_throws = self.available_oppo_throws
 
 
-        wanted_type = ["r","p","s"]
-        if id == "ally":
-            current_type_ally = []
-            for piece in self.board.board[self.ally]:
-                if piece[0] not in current_type_ally:
-                    current_type_ally.append(piece[0])
+    #     wanted_type = ["r","p","s"]
+    #     if id == "ally":
+    #         current_type_ally = []
+    #         for piece in self.board.board[self.ally]:
+    #             if piece[0] not in current_type_ally:
+    #                 current_type_ally.append(piece[0])
             
 
-            current_type_oppo = []
-            for piece in self.board.board[self.oppo]:
-                if piece[0] not in current_type_oppo:
-                    current_type_oppo.append(piece[0])
-            # print(current_type_ally)
-            # print(current_type_oppo)
-            if ('r' in current_type_oppo and 'p' in current_type_ally) or 'r' not in current_type_oppo:
-                wanted_type.remove('p')
-            if ('s' in current_type_oppo and 'r' in current_type_ally) or 's' not in current_type_oppo:
-                wanted_type.remove('r')
-            if ('p' in current_type_oppo and 's' in current_type_ally) or 'p' not in current_type_oppo:
-                wanted_type.remove('s')
+    #         current_type_oppo = []
+    #         for piece in self.board.board[self.oppo]:
+    #             if piece[0] not in current_type_oppo:
+    #                 current_type_oppo.append(piece[0])
+    #         # print(current_type_ally)
+    #         # print(current_type_oppo)
+    #         if ('r' in current_type_oppo and 'p' in current_type_ally) or 'r' not in current_type_oppo:
+    #             wanted_type.remove('p')
+    #         if ('s' in current_type_oppo and 'r' in current_type_ally) or 's' not in current_type_oppo:
+    #             wanted_type.remove('r')
+    #         if ('p' in current_type_oppo and 's' in current_type_ally) or 'p' not in current_type_oppo:
+    #             wanted_type.remove('s')
 
  
-            if len(wanted_type) == 0 and len(current_type_oppo)== 0:
-                wanted_type = self.type
+    #         if len(wanted_type) == 0 and len(current_type_oppo)== 0:
+    #             wanted_type = self.type
             
 
-        # print(wanted_type, id)
+    #     # print(wanted_type, id)
 
-        for i in wanted_type:
-            for j in available_throws:
-                possible_throws.append(("THROW",i,j))
+    #     for i in wanted_type:
+    #         for j in available_throws:
+    #             possible_throws.append(("THROW",i,j))
         
-        return possible_throws
+    #     return possible_throws
 
 
 
