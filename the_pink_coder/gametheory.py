@@ -100,7 +100,9 @@ if __name__ == "__main__":
     print("soln:", *solve_game(A, maximiser=False, rowplayer=False))
     print("true:", np.array([1/5, 4/5]), 3/5)
     print()
-    print(solve_game([[10,2], [1, 1]]))
+
+    print("testing")
+    print(solve_game([[-10, 10], [-10, -10]]))
 
 
 

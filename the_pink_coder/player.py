@@ -61,6 +61,7 @@ class Player:
         #     for oppo_action in possible_oppo_actions:
         #         board = deepcopy(self.board)
         #         board.update_board(oppo_action, ally_action, False)
+                    
         #         temp_array.append(board.evaluation())
             
         #     matrix.append(temp_array)

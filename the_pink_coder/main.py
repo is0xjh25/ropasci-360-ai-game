@@ -14,7 +14,6 @@ def main():
     player1.update(player1.action(),("THROW","p",(-3,0)))
     player1.update(player1.action(),("THROW","p",(-3,0)))
     player1.update(player1.action(),("THROW","p",(-3,0)))
-    print(player1.action())
     
     # print(player.board)
     
