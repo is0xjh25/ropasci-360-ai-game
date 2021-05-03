@@ -9,30 +9,37 @@ class Board:
         self.board = board
 
 
-    def update_board(self, oppo_action, ally_action):
+    def update_board(self, oppo_action, ally_action, printRes):
         
         # Update ally action
         id = getattr(self, "ally")
         action = ally_action
-              
-        for i in range(0, 2, 1):       
-            if action[0] == "THROW":
-                self.board[id].append([action[1],(action[2][0],action[2][1])])
-            else:
-                for piece in self.board[id]:
-                    index = piece[1]
-                    if index == action[1]:
-                        new_piece = [piece[0],(action[2][0], action[2][1])]
-                        self.board[id].remove(piece)
-                        self.board[id].append(new_piece)
-                        break
-                        
-            
-            # Update opponent action
-            id = getattr(self, "oppo")
-            action = oppo_action
 
 
+        if action[0] == "THROW":
+            self.board[self.ally].append([action[1],(action[2][0],action[2][1])])
+        else:
+            for piece in self.board[self.ally]:
+                index = piece[1]
+                if index == action[1]:
+                    new_piece = [piece[0],(action[2][0], action[2][1])]
+                    self.board[self.ally].remove(piece)
+                    self.board[self.ally].append(new_piece)
+                    break
+        
+        action = oppo_action
+
+        if action[0] == "THROW":
+            self.board[self.oppo].append([action[1],(action[2][0],action[2][1])])
+        else:
+            for piece in self.board[self.oppo]:
+                index = piece[1]
+                if index == action[1]:
+                    new_piece = [piece[0],(action[2][0], action[2][1])]
+                    self.board[self.oppo].remove(piece)
+                    self.board[self.oppo].append(new_piece)
+                    break
+        
         # Update combat result
         tokens = self.board["upper"] + self.board["lower"]
         
@@ -52,31 +59,35 @@ class Board:
         return math.sqrt(pow(coord_1[0] - coord_2[0], 2) + pow(coord_1[1] - coord_2[1], 2))
 
 
+    
+    
+
+
     # Generate evaluative value for one actions
-    def evaluation(self):   
+    def evaluation(self, old_board):   
         
         score = 0
-        # score += len(self.board[self.ally])
-        # score -= len(self.board[self.oppo])
 
         for i in self.board[self.ally]:
             for j in self.board[self.oppo]: 
-                score += game.defeat_score(i[0], j[0], (9 - self.distance(i, j)))
-        # print(self.board)
-        if len(self.board[self.oppo]) == 0:
-            score = score / (len(self.board[self.ally]))
-        elif len(self.board[self.ally]) == 0:
-            score = score / (len(self.board[self.oppo]))
-        else:
-            score = score / (len(self.board[self.ally])*len(self.board[self.oppo]))
+                score += game.defeat_score(i[0], j[0], (12 - self.distance(i, j)))
+        if len(self.board[self.ally]) < len(old_board.board[self.ally]):
+            score -= (len(old_board.board[self.ally]) - len(self.board[self.ally])) * 3
+        if len(self.board[self.oppo]) < len(old_board.board[self.oppo]):
+            score += (len(old_board.board[self.oppo]) - len(self.board[self.oppo])) * 3
+
+        if len(self.board[self.oppo]) == len(old_board.board[self.oppo]):
+                score -= 2
+        if score > 0:
+            if len(self.board[self.ally]) == 0 and len(self.board[self.oppo]) == 0:
+                score = score
+            elif len(self.board[self.oppo]) == 0:
+                score = score / (len(self.board[self.ally]))
+            elif len(self.board[self.ally]) == 0:
+                score = score / (len(self.board[self.oppo]))
+            else:
+                score = score / (len(self.board[self.ally])+len(self.board[self.oppo]))
+            
         return score
 
-
-def get_closest_defeated_index(self, upper_index, board):
-        distance = float('inf');
-        cloest_index = None;
-        for j in board[self.game.enemy]:
-            if self.game.defeated(upper_index, j) is 'win' and dist(upper_index,j)<distance:
-                cloest_index = j
-        return cloest_index
 

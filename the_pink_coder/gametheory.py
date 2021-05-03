@@ -43,16 +43,14 @@ def solve_game(V, maximiser=True, rowplayer=True):
     * OptimisationError: If the optimisation reports failure. The message
         from the optimiser will accompany this exception.
     """
+
     V = np.asarray(V)
-    
     # lprog will solve for the column-maximiser
     if rowplayer:
         V = V.T
     if not maximiser:
         V = -V
     m, n = V.shape
-
-    # print(V.T)
     # ensure positive
     c = -V.min() + 1
     Vpos = V + c
@@ -64,7 +62,7 @@ def solve_game(V, maximiser=True, rowplayer=True):
     )
     if res.status:
         raise OptimisationError(res.message) # TODO: propagate whole result
-    # compute startegy and value
+    # compute strategy and value
     v = 1 / res.x.sum()
     s = res.x * v
     v = v - c # re-scale
@@ -81,7 +79,7 @@ if __name__ == "__main__":
     # Rock paper scissors example (row player, maximiser)
     print("test: rock paper scissors")
     RPS = np.array([
-        [  0, -1, +1 ],
+        [  0, -1, +100 ],
         [ +1,  0, -1 ],
         [ -1, +1,  0 ],
     ])
@@ -101,11 +99,12 @@ if __name__ == "__main__":
     print("true:", np.array([1/5, 4/5]), 3/5)
     print()
 
-    print("testing")
-    print(solve_game([[-10, 10], [-10, -10]]))
+    print("test: student example")
+    V = np.array([[3, -1], [-1, -1]])
+    print("game:", V, sep="\n")
+    print("soln:", *solve_game(V, maximiser=True))
+    print("true:", "(any strategy)         ", -1.0)
+    print()
+    # print(solve_game([[-10, -20],[-10,-10]], True, True)) 
 
-
-
-
-
-
+    print(solve_game([[100, 100],[100, 100]],True, True))
