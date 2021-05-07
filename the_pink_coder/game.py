@@ -1,4 +1,6 @@
 import math
+
+
 def move(board, index, id):
     
     action_list = []
@@ -21,7 +23,6 @@ def move(board, index, id):
 
 
 def swing(board, index, id):
-    # print(id)
     possible_trans_index = slide(index)
     trans_index = []
     result_pieces = []
@@ -79,8 +80,6 @@ def out_boundary(coord):
 
 # RoPaSci combat rule
 def defeat(piece_1, piece_2):
-    # If two piece are on the same spot
-
     if ((piece_1[0] == 'r') and (piece_2[0] == 's')) or ((piece_1[0] == 's') and (piece_2[0] == 'p')) or ((piece_1[0] == 'p') and (piece_2[0] == 'r')):
         return True 
     elif ((piece_1[0] == 'r') and (piece_2[0] == 'p')) or ((piece_1[0] == 's') and (piece_2[0] == 'r')) or ((piece_1[0] == 'p') and (piece_2[0] == 's')):
@@ -91,15 +90,6 @@ def defeat(piece_1, piece_2):
         return False
 
 
-def defeat_score(type_1, type_2, factor):
-    if ((type_1 == 'r') and (type_2 == 's')) or ((type_1 == 's') and (type_2 == 'p')) or ((type_1 == 'p') and (type_2 == 'r')):
-        return 1*factor
-    elif ((type_1 == 'r') and (type_2 == 'p')) or ((type_1 == 's') and (type_2 == 'r')) or ((type_1== 'p') and (type_2 == 's')):
-        return -1*factor
-    elif ((type_1 == 'r') and (type_2 == 'r')) or ((type_1 == 'p') and (type_2 == 'p')) or ((type_1 == 's') and (type_2 == 's')):
-        return 0
-
- 
 # Get coordinates from one piece, piece = ('r',(0,1))
 def get_coord(piece):
     return (piece[1][0], piece[1][1])
@@ -111,9 +101,3 @@ def same_coord(piece_1, piece_2):
         return True
     else:
         return False
-
-
-def distance(piece_1, piece_2):
-    coord_1 = get_coord(piece_1)
-    coord_2 = get_coord(piece_2)
-    return math.sqrt(pow(coord_1[0] - coord_2[0], 2) + pow(coord_1[1] - coord_2[1], 2))

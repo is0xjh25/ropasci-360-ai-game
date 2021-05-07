@@ -6,6 +6,7 @@ import random
 
 class Player:
     
+    
     def __init__(self, player):
         self.ally = player
 
@@ -17,19 +18,15 @@ class Player:
         self.board = board.Board(self.ally, self.oppo)
         self.round = 0
 
-        self.history_action = []
-
         self.board.update_available_throw()
 
 
     def action(self):
         self.round += 1
-
         best_action = self.board.generate_best_action()
-        print(self.round)
         return best_action
 
-    
+
     def update(self, oppo_action, ally_action):
         self.board.update_board(oppo_action, ally_action, True) 
 

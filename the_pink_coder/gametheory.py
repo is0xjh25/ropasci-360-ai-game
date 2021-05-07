@@ -105,6 +105,3 @@ if __name__ == "__main__":
     print("soln:", *solve_game(V, maximiser=True))
     print("true:", "(any strategy)         ", -1.0)
     print()
-    # print(solve_game([[-10, -20],[-10,-10]], True, True)) 
-
-    print(solve_game([[100, 100],[100, 100]],True, True))
