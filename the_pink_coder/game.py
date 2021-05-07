@@ -93,7 +93,7 @@ def defeat(piece_1, piece_2):
 
 def defeat_score(type_1, type_2, factor):
     if ((type_1 == 'r') and (type_2 == 's')) or ((type_1 == 's') and (type_2 == 'p')) or ((type_1 == 'p') and (type_2 == 'r')):
-        return 1*factor
+        return 1.5*factor
     elif ((type_1 == 'r') and (type_2 == 'p')) or ((type_1 == 's') and (type_2 == 'r')) or ((type_1== 'p') and (type_2 == 's')):
         return -1*factor
     elif ((type_1 == 'r') and (type_2 == 'r')) or ((type_1 == 'p') and (type_2 == 'p')) or ((type_1 == 's') and (type_2 == 's')):
@@ -117,3 +117,4 @@ def distance(piece_1, piece_2):
     coord_1 = get_coord(piece_1)
     coord_2 = get_coord(piece_2)
     return math.sqrt(pow(coord_1[0] - coord_2[0], 2) + pow(coord_1[1] - coord_2[1], 2))
+    # return abs(coord_1[0] - coord_2[0]) + abs(coord_1[1] - coord_2[1]) 
