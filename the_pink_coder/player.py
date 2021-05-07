@@ -19,21 +19,20 @@ class Player:
 
         self.history_action = []
 
-
-    def action(self):
         self.board.update_available_throw()
 
-        # print(possible_oppo_actions)
-        # Round Increament
+
+    def action(self):
         self.round += 1
 
         best_action = self.board.generate_best_action()
+        print(self.round)
         return best_action
 
     
     def update(self, oppo_action, ally_action):
-        
-        self.board.update_board(oppo_action, ally_action, True)
+        self.board.update_board(oppo_action, ally_action, True) 
+
 
 
 

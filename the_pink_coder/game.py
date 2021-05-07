@@ -1,3 +1,4 @@
+import math
 def move(board, index, id):
     
     action_list = []
@@ -79,15 +80,13 @@ def out_boundary(coord):
 # RoPaSci combat rule
 def defeat(piece_1, piece_2):
     # If two piece are on the same spot
-    if same_coord(piece_1, piece_2):
-        if ((piece_1[0] == 'r') and (piece_2[0] == 's')) or ((piece_1[0] == 's') and (piece_2[0] == 'p')) or ((piece_1[0] == 'p') and (piece_2[0] == 'r')):
-            return True 
-        elif ((piece_1[0] == 'r') and (piece_2[0] == 'p')) or ((piece_1[0] == 's') and (piece_2[0] == 'r')) or ((piece_1[0] == 'p') and (piece_2[0] == 's')):
-            return False
-        elif ((piece_1[0] == 'r') and (piece_2[0] == 'r')) or ((piece_1[0] == 'p') and (piece_2[0] == 'p')) or ((piece_1[0] == 's') and (piece_2[0] == 's')):
-            return False
-        else:
-            return False
+
+    if ((piece_1[0] == 'r') and (piece_2[0] == 's')) or ((piece_1[0] == 's') and (piece_2[0] == 'p')) or ((piece_1[0] == 'p') and (piece_2[0] == 'r')):
+        return True 
+    elif ((piece_1[0] == 'r') and (piece_2[0] == 'p')) or ((piece_1[0] == 's') and (piece_2[0] == 'r')) or ((piece_1[0] == 'p') and (piece_2[0] == 's')):
+        return False
+    elif ((piece_1[0] == 'r') and (piece_2[0] == 'r')) or ((piece_1[0] == 'p') and (piece_2[0] == 'p')) or ((piece_1[0] == 's') and (piece_2[0] == 's')):
+        return False
     else:
         return False
 
@@ -112,3 +111,9 @@ def same_coord(piece_1, piece_2):
         return True
     else:
         return False
+
+
+def distance(piece_1, piece_2):
+    coord_1 = get_coord(piece_1)
+    coord_2 = get_coord(piece_2)
+    return math.sqrt(pow(coord_1[0] - coord_2[0], 2) + pow(coord_1[1] - coord_2[1], 2))
