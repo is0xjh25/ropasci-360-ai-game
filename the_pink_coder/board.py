@@ -13,6 +13,8 @@ class Board:
         self.available_ally_throws = []
         self.available_oppo_throws = []
         self.possible_ally_throws = []
+
+        self.ally_index = []
         self.ally_throw_remain = 9
         self.oppo_throw_remain = 9
         self.type = ["r", "p", "s"]
