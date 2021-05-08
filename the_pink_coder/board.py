@@ -3,9 +3,11 @@ import the_pink_coder.game as game
 from copy import deepcopy
 import the_pink_coder.gametheory as gt
 import numpy as np
+import random
 
 class Board:
     
+    # Initialize the board
     def __init__(self, ally, oppo, board={"upper": [], "lower": []}):
         self.ally = ally
         self.oppo = oppo
@@ -13,7 +15,6 @@ class Board:
         self.available_ally_throws = []
         self.available_oppo_throws = []
         self.possible_ally_throws = []
-
         self.ally_index = []
         self.ally_throw_remain = 9
         self.oppo_throw_remain = 9
@@ -22,6 +23,7 @@ class Board:
         self.last_position = ()
 
 
+    # Update the board, called by player's update function
     def update_board(self, oppo_action, ally_action, printRes):
         
         if ally_action[0] == "THROW":
@@ -72,18 +74,19 @@ class Board:
 
         self.update_available_throw()
 
-
+    # Calculate the distance between two pieces
     def distance(self, piece_1, piece_2):
         coord_1 = game.get_coord(piece_1)
         coord_2 = game.get_coord(piece_2)
         return math.sqrt(pow(coord_1[0] - coord_2[0], 2) + pow(coord_1[1] - coord_2[1], 2))
 
 
+    # Calculate the defeated score for two piece, used by evaluation function
     def defeat_score(self, type_1, type_2, factor):
         if ((type_1 == 'r') and (type_2 == 's')) or ((type_1 == 's') and (type_2 == 'p')) or ((type_1 == 'p') and (type_2 == 'r')):
-            return 1*factor
+            return 1.22 * factor
         elif ((type_1 == 'r') and (type_2 == 'p')) or ((type_1 == 's') and (type_2 == 'r')) or ((type_1== 'p') and (type_2 == 's')):
-            return -1*factor
+            return -1 * factor
         elif ((type_1 == 'r') and (type_2 == 'r')) or ((type_1 == 'p') and (type_2 == 'p')) or ((type_1 == 's') and (type_2 == 's')):
             return 0
     
@@ -91,38 +94,41 @@ class Board:
     # Generate evaluative value for one actions
     def evaluation(self, old_board):   
         
+        # 
         score = 0
-        distance_score = 0
 
+        # Calculating the distance score, basically is on how far of ally token
+        # from the opponent token which it could defeat and the opponent which 
+        # could defeated it
+        distance_score = 0
         for i in self.board[self.ally]:
             min_defeated = 99999
             max_defeated = -99999
-            count = 0
             for j in self.board[self.oppo]: 
                 current_score = self.defeat_score(i[0], j[0], (12 - self.distance(i, j)))
                 if current_score < 0 and current_score > max_defeated:
-                    max_defeated = 2 * current_score
+                    max_defeated = current_score
                 elif current_score > 0 and current_score < min_defeated:
-                    min_defeated = 2 * current_score
+                    min_defeated = current_score
 
             if max_defeated != -99999:
                 distance_score += max_defeated
             if min_defeated != 99999:
                 distance_score += min_defeated
 
+        if len(self.board[self.ally]) > 0:
+            distance_score = distance_score / len(self.board[self.ally])
+
+        # Compare the difference of amount of ally token and opponent token
         diff_ally = len(old_board.board[self.ally]) - len(self.board[self.ally])
         diff_oppo = len(old_board.board[self.oppo]) - len(self.board[self.oppo])
 
-        if diff_ally < 0:
-            diff_ally = 0
-        if diff_oppo < 0:
-            diff_oppo = 0
-
-        score = distance_score - 12 * diff_ally + 16 * diff_oppo
+        # Assign weight to different feature and 
+        score = 1.5 * distance_score - 12 * diff_ally + 16 * diff_oppo
             
         return score
 
-
+    # Update the available throw of both ally and opponent in each turn
     def update_available_throw(self):
     
         # Update ally throws
@@ -162,19 +168,14 @@ class Board:
             throw = getattr(self, "oppo_throw_remain")
             available_throws = getattr(self, "available_oppo_throws")
 
-
-    def generate_best_action(self, multi=False):
-
+    # Strategy 1:
+    # While there are some opponent token in our throwable area, definetly
+    # choose to throw the token which could kill it 
+    def generate_action_strategy_1(self):
         ally_dict = {"r":0,"p":0,"s":0}
         for peice in self.board[self.ally]:
             ally_dict[peice[0]] += 1
-        
-        oppo_type = []
-        for oppo in self.board[self.oppo]:
-            if oppo[0] not in oppo_type:
-                oppo_type.append(oppo[0])
 
-        # Kill directly
         possible_ally_actions = []
         if self.ally_throw_remain > 3:
             for piece in self.board[self.oppo]:
@@ -185,6 +186,18 @@ class Board:
                         possible_ally_actions.append(("THROW", "s", (piece[1])))
                     elif (piece[0] == 's' and ally_dict["r"]/len(self.board[self.ally]) < 0.4) or (piece[0] == 's' and self.oppo_throw_remain == 0):
                         possible_ally_actions.append(("THROW", "r", (piece[1])))
+        return possible_ally_actions
+
+    # Generate the best action
+    def generate_best_action(self, multi=False):
+        
+        oppo_type = []
+        for oppo in self.board[self.oppo]:
+            if oppo[0] not in oppo_type:
+                oppo_type.append(oppo[0])
+
+        # Strategy 1:
+        possible_ally_actions = self.generate_action_strategy_1()
 
         if len(possible_ally_actions) > 0:
             percentage = 1 - (1 / len(self.board[self.oppo]))
@@ -198,11 +211,16 @@ class Board:
         if len(possible_ally_actions) == 1:
             return possible_ally_actions[0] 
 
+        # If there is no any actions in strategy 1, apply strategy 2, get all
+        # actions which choose to be considered as good action based on current
+        # board status 
         if len(possible_ally_actions) == 0:
             possible_ally_actions = self.get_actions("ally")
 
         possible_oppo_actions = self.get_actions("oppo")
 
+        # Generate the matrix, representing the evaluation of the board 
+        # after applying one of ally action and opponent acction
         matrix = []
         for ally_action in possible_ally_actions:
             temp_array = []
@@ -213,10 +231,9 @@ class Board:
             
             matrix.append(temp_array)
 
-        list_res , expect = gt.solve_game(matrix)
-        max_score = max(list_res)
+        list_res, expect = gt.solve_game(matrix)
 
-        # Multi-stage
+        # Multi stage part
         if multi == True and len(list_res) >= 2:
             possible_ally_actions_2 = []
             # Median
@@ -242,14 +259,20 @@ class Board:
             list_res_2, expect = gt.solve_game(matrix_2)
             max_score_2 = max(list_res_2)
             best_action = possible_ally_actions_2[list(list_res_2).index(max_score_2)]
-        
+
         # Single-stage
         else:
-            best_action = possible_ally_actions[list(list_res).index(max_score)]
+
+            # Use random choice to choose the action based on the probability
+            # list provided, to avoid the best action being predicted
+            size = len(possible_ally_actions)
+            index = np.random.choice(np.arange(size), p = list(list_res))
+            best_action = possible_ally_actions[index]
         
         return best_action
 
 
+    # Get the action, including move or throw
     def get_actions(self, id):
     
         possible_throw_actions = []
@@ -267,12 +290,8 @@ class Board:
 
         all_token = self.board[getattr(self, id)]
 
-        oppo_type = []
-        for oppo in self.board[getattr(self, oppo_id)]:
-            if oppo not in oppo_type:
-                oppo_type.append(oppo[0])
-
-        defeated_distance = 99999
+        # Choose one action which is closest to kill the opponent token for 
+        # each type, the would be the token which can move in this round
         dict = {"r": 99999, "p":99999,"s":99999}
         dict_piece = {}
         moveable = []
@@ -294,6 +313,12 @@ class Board:
         if len(moveable) == 0:
             moveable = all_token
 
+        oppo_type = []
+        for oppo in self.board[getattr(self, oppo_id)]:
+            if oppo not in oppo_type:
+                oppo_type.append(oppo[0])
+
+        # For those choosen token, get all their move action, (slide, swing)
         for i in moveable:
             if len(oppo_type) == 1 and i[0] in oppo_type:
                 continue
@@ -307,7 +332,8 @@ class Board:
                 else:
                     pass
         
-        # Remove pieces on same spot
+        # Remove pieces on same spot, avoid two ally token being in a same
+        # coordinate
         current_index = []
         for piece in self.board[self.ally]:
             current_index.append(piece[1])
@@ -322,7 +348,7 @@ class Board:
 
         return possible_move_actions + possible_throw_actions
 
-
+    # Get all the throw action based on remaining throw amount
     def get_throws(self, id):
         possible_throws = []
         
@@ -332,8 +358,7 @@ class Board:
             available_throws = self.available_oppo_throws
 
         wanted_type = ["r","p","s"]
-        if id == "ally":
-            
+        if id == "ally":    
             current_type_ally = []
             for piece in self.board[self.ally]:
                 if piece[0] not in current_type_ally:
@@ -354,8 +379,7 @@ class Board:
             if len(wanted_type) == 0 and self.oppo_throw_remain == 9:
                 wanted_type = self.type
         
-        if id == "oppo":
-            
+        if id == "oppo":      
             current_type_ally = []
             for piece in self.board[self.oppo]:
                 if piece[0] not in current_type_ally:
@@ -379,17 +403,15 @@ class Board:
         for i in wanted_type:
             for j in available_throws:
                 possible_throws.append(("THROW",i,j))
-        
+        random.shuffle(possible_throws)
+
         return possible_throws
 
-
+    # Function for multi-stage section of the implementation
     def multi_stage(self):
-        
         possible_ally_actions = self.get_actions("ally")
         possible_oppo_actions = self.get_actions("oppo")
-
         matrix = []
-        
         for ally_action in possible_ally_actions:
             temp_array = []
             for oppo_action in possible_oppo_actions:
@@ -397,7 +419,5 @@ class Board:
                 board.update_board(oppo_action, ally_action, False)
                 temp_array.append(board.evaluation(self))
             matrix.append(temp_array)
-        
         list_res, expect = gt.solve_game(matrix)
-
         return expect
