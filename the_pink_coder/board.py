@@ -16,25 +16,28 @@ class Board:
         self.available_oppo_throws = []
         self.possible_ally_throws = []
         self.ally_index = []
+        self.protected = True
         self.ally_throw_remain = 9
         self.oppo_throw_remain = 9
         self.type = ["r", "p", "s"]
         self.all_index = {4: (-4, 0), 3: (-4, 1), 2: (-4, 2), 1: (-4, 3), 0: (-4, 4), -1: (-3, 4), -2: (-2, 4), -3: (-1, 4), -4: (0, 4)}
         self.last_position = ()
+        self.round = 0
 
 
     # Update the board, called by player's update function
     def update_board(self, oppo_action, ally_action, printRes):
-        
+        self.round+=1
         if ally_action[0] == "THROW":
             self.ally_throw_remain -= 1
         if oppo_action[0] == "THROW":
             self.oppo_throw_remain -= 1
 
+        if self.oppo_throw_remain < 4 or self.round > 10:
+            self.protected = False
         # Update ally action
         id = getattr(self, "ally")
         action = ally_action
-
         self.last_position = ally_action
         if action[0] == "THROW":
             self.board[self.ally].append([action[1],(action[2][0],action[2][1])])
@@ -86,7 +89,7 @@ class Board:
         if ((type_1 == 'r') and (type_2 == 's')) or ((type_1 == 's') and (type_2 == 'p')) or ((type_1 == 'p') and (type_2 == 'r')):
             return 1.22 * factor
         elif ((type_1 == 'r') and (type_2 == 'p')) or ((type_1 == 's') and (type_2 == 'r')) or ((type_1== 'p') and (type_2 == 's')):
-            return -1 * factor
+            return -0.77 * factor
         elif ((type_1 == 'r') and (type_2 == 'r')) or ((type_1 == 'p') and (type_2 == 'p')) or ((type_1 == 's') and (type_2 == 's')):
             return 0
     
@@ -176,40 +179,40 @@ class Board:
         for peice in self.board[self.ally]:
             ally_dict[peice[0]] += 1
 
+        remain_oppo = len(self.board[self.oppo]) + self.oppo_throw_remain
         possible_ally_actions = []
-        if self.ally_throw_remain > 3:
+        if self.ally_throw_remain > 2:
             for piece in self.board[self.oppo]:
                 if piece[1] in self.possible_ally_throws:
-                    if (piece[0] == 'r' and ally_dict["p"]/len(self.board[self.ally]) < 0.4) or (piece[0] == 'r' and self.oppo_throw_remain == 0):
+                    if (piece[0] == 'r' and ally_dict["p"]/len(self.board[self.ally]) <= 0.6) or (piece[0] == 'r' and remain_oppo < 2):
                         possible_ally_actions.append(("THROW", "p", (piece[1])))
-                    elif (piece[0] == 'p' and ally_dict["s"]/len(self.board[self.ally]) < 0.4) or (piece[0] == 'p' and self.oppo_throw_remain == 0):
+                    elif (piece[0] == 'p' and ally_dict["s"]/len(self.board[self.ally]) <= 0.6) or (piece[0] == 'p' and remain_oppo < 2):
                         possible_ally_actions.append(("THROW", "s", (piece[1])))
-                    elif (piece[0] == 's' and ally_dict["r"]/len(self.board[self.ally]) < 0.4) or (piece[0] == 's' and self.oppo_throw_remain == 0):
+                    elif (piece[0] == 's' and ally_dict["r"]/len(self.board[self.ally]) <= 0.6) or (piece[0] == 's' and remain_oppo < 2):
                         possible_ally_actions.append(("THROW", "r", (piece[1])))
-        return possible_ally_actions
-
-    # Generate the best action
-    def generate_best_action(self, multi=False):
-        
-        oppo_type = []
-        for oppo in self.board[self.oppo]:
-            if oppo[0] not in oppo_type:
-                oppo_type.append(oppo[0])
-
-        # Strategy 1:
-        possible_ally_actions = self.generate_action_strategy_1()
-
+              
         if len(possible_ally_actions) > 0:
             percentage = 1 - (1 / len(self.board[self.oppo]))
-            if percentage >= 0.5:
-                pass 
-            elif len(self.board[self.oppo]) == 1 or len(oppo_type) == 1:
+            if percentage >= 0.65:
+                pass
+            elif len(self.board[self.oppo]) + self.oppo_throw_remain < 4: 
                 pass
             else:
                 possible_ally_actions = []
+        # print(possible_ally_actions) 
+        # if possible_ally_actions != []:
+        #     return 0
+        return possible_ally_actions
+
+
+    # Generate the best action
+    def generate_best_action(self, multi=False):
+        # Strategy 1:
+        possible_ally_actions = self.generate_action_strategy_1()
 
         if len(possible_ally_actions) == 1:
             return possible_ally_actions[0] 
+        
 
         # If there is no any actions in strategy 1, apply strategy 2, get all
         # actions which choose to be considered as good action based on current
@@ -218,7 +221,8 @@ class Board:
             possible_ally_actions = self.get_actions("ally")
 
         possible_oppo_actions = self.get_actions("oppo")
-
+        # print(possible_ally_actions)
+        # print(possible_oppo_actions)
         # Generate the matrix, representing the evaluation of the board 
         # after applying one of ally action and opponent acction
         matrix = []
@@ -269,12 +273,14 @@ class Board:
             index = np.random.choice(np.arange(size), p = list(list_res))
             best_action = possible_ally_actions[index]
         
+
         return best_action
 
 
     # Get the action, including move or throw
     def get_actions(self, id):
     
+
         possible_throw_actions = []
         possible_move_actions = []
 
@@ -296,7 +302,7 @@ class Board:
         dict_piece = {}
         moveable = []
         
-        for i in all_token:
+        for i in moveable:
             flag = 0
             for oppo in self.board[getattr(self, oppo_id)]:
                 if game.defeat(i, oppo) and self.distance(i, oppo) < dict[i[0]]:
@@ -313,50 +319,94 @@ class Board:
         if len(moveable) == 0:
             moveable = all_token
 
-        oppo_type = []
-        for oppo in self.board[getattr(self, oppo_id)]:
-            if oppo not in oppo_type:
-                oppo_type.append(oppo[0])
 
         # For those choosen token, get all their move action, (slide, swing)
-        for i in moveable:
-            if len(oppo_type) == 1 and i[0] in oppo_type:
-                continue
-            action_list = game.move(self, i, id)
-            slide_move = game.slide(i)
-            for index in action_list:
-                if index in slide_move and ("SLIDE", index, i[1]) != self.last_position: 
-                    possible_move_actions.append(("SLIDE", (i[1]), index))
-                elif index not in slide_move and ("SWING", index, i[1]) != self.last_position:
-                    possible_move_actions.append(("SWING", (i[1]), index))
-                else:
-                    pass
+        possible_move_actions = self.get_move(id, moveable)
         
         # Remove pieces on same spot, avoid two ally token being in a same
         # coordinate
-        current_index = []
-        for piece in self.board[self.ally]:
-            current_index.append(piece[1])
 
-        for action in possible_move_actions:
-            if action[2] in current_index:
-                possible_move_actions.remove(action)
-        
-        for action in possible_throw_actions:
-            if action[2] in current_index:
-                possible_throw_actions.remove(action)
+
+
+
+        if id == "ally":
+            current_index = []
+            for piece in self.board[self.ally]:
+                current_index.append(piece[1])
+            print(current_index)
+            for action in possible_move_actions:
+                if action[2] in current_index:
+                    possible_move_actions.remove(action)
+            
+            for action in possible_throw_actions:
+                if action[2] in current_index:
+                    possible_throw_actions.remove(action)
 
         return possible_move_actions + possible_throw_actions
+
+
+    def get_move(self, id, moveable):
+
+        possible_move_actions = []
+
+        limit_list = []
+        if self.ally == "lower":
+            limit_list = [4,3,2,1,0]
+        else:
+            limit_list = [-4,-3,-2,-1,0]
+        
+        # for i in moveable:
+        #     action_list = game.move(self, i, id)
+        #     slide_move = game.slide(i)
+        #     for index in action_list:
+        #         if index in slide_move and ("SLIDE", index, i[1]) != self.last_position: 
+        #             possible_move_actions.append(("SLIDE", (i[1]), index))
+        #         elif index not in slide_move and ("SWING", index, i[1]) != self.last_position:
+        #             possible_move_actions.append(("SWING", (i[1]), index))
+        #         else:
+        #             pass
+
+        if id == "ally":
+            for i in moveable:
+                action_list = game.move(self, i, id)
+                slide_move = game.slide(i)
+                for index in action_list:
+                    if self.protected == True and index[0] in limit_list:
+                        pass
+                    else:
+                        if index in slide_move and ("SLIDE", index, i[1]) != self.last_position: 
+                            possible_move_actions.append(("SLIDE", (i[1]), index))
+                        elif index not in slide_move and ("SWING", index, i[1]) != self.last_position:
+                            possible_move_actions.append(("SWING", (i[1]), index))
+                        else:
+                            pass
+
+        else:
+            for i in moveable:
+                action_list = game.move(self, i, id)
+                slide_move = game.slide(i)
+                for index in action_list:
+                    if index in slide_move and ("SLIDE", index, i[1]) != self.last_position: 
+                        possible_move_actions.append(("SLIDE", (i[1]), index))
+                    elif index not in slide_move and ("SWING", index, i[1]) != self.last_position:
+                        possible_move_actions.append(("SWING", (i[1]), index))
+                    else:
+                        pass
+        return possible_move_actions
+
+
 
     # Get all the throw action based on remaining throw amount
     def get_throws(self, id):
         possible_throws = []
         
         if id == "ally":
-            available_throws = self.available_ally_throws
+            available_throws = self.possible_ally_throws
         elif id == "oppo":
             available_throws = self.available_oppo_throws
 
+
+        # Avoid unnecessary throw
         wanted_type = ["r","p","s"]
         if id == "ally":    
             current_type_ally = []

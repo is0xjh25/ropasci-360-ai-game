@@ -1,6 +1,6 @@
 import the_pink_coder.gametheory as gt
 import the_pink_coder.game as game
-import the_pink_coder.board as board
+import the_pink_coder.new_board as board
 from copy import deepcopy
 import random
 
