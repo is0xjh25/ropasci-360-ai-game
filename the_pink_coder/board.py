@@ -131,8 +131,6 @@ class Board:
         possible_ally_actions = self.get_actions_ally()
         possible_oppo_actions = self.get_actions_oppo()
 
-        print(possible_ally_actions)
-        print(possible_oppo_actions)
 
         # Based on ally's action and opponent's action, create a pay-off matrix
         # regarding ally's action and opponent's action
@@ -269,7 +267,7 @@ class Board:
 
         possible_ally_actions = []
         remain_oppo = len(self.board[self.ally]) + self.ally_throw_remain
-        if self.oppo_throw_remain > 0:
+        if self.oppo_throw_remain > 2:
             for piece in self.board[self.ally]:
                 if piece[1] in self.possible_oppo_throws:
                     if (piece[0] == 'r' and (ally_dict["p"]+1) /(len(self.board[self.oppo])+1) <= 0.5) or (piece[0] == 'r' and remain_oppo <= 2):
