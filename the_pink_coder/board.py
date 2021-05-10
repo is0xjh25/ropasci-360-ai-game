@@ -127,9 +127,12 @@ class Board:
 
 
     # Generate the best action out player could do based on current situation
-    def generate_best_action(self, multi=True):
+    def generate_best_action(self, multi=False):
         possible_ally_actions = self.get_actions_ally()
         possible_oppo_actions = self.get_actions_oppo()
+
+        print(possible_ally_actions)
+        print(possible_oppo_actions)
 
         # Based on ally's action and opponent's action, create a pay-off matrix
         # regarding ally's action and opponent's action
@@ -361,7 +364,8 @@ class Board:
                     flag = 1
 
         for atype in dict_piece:
-            moveable.append(dict_piece[atype])
+            if dict_piece[atype] not in moveable:
+                moveable.append(dict_piece[atype])
 
         if len(moveable) == 0:
             moveable = ally_token
@@ -403,10 +407,12 @@ class Board:
                     flag = 1
 
         for atype in dict_piece:
-            moveable.append(dict_piece[atype])
+            if dict_piece[atype] not in moveable:
+                moveable.append(dict_piece[atype])
 
         if len(moveable) == 0:
             moveable = ally_token
+
         for piece in moveable:
             action_list = game.move(self, piece, "ally")
             slide_move = game.slide(piece)
