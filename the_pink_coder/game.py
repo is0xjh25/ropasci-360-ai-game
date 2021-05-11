@@ -1,6 +1,4 @@
-import math
-
-# Create by ThePinkCoder on May 10th, 2021
+# Created by ThePinkCoder on May 10th, 2021
 # Referenced to comp30024-porject-a
 
 def move(board, index, id):

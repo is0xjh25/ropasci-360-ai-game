@@ -4,7 +4,7 @@ import the_pink_coder.board as board
 from copy import deepcopy
 import random
 
-# Create by ThePinkCoder on May 10th, 2021
+# Created by ThePinkCoder on May 10th, 2021
 
 class Player:
     
@@ -19,11 +19,13 @@ class Player:
         self.history_action = []
         self.board.update_available_throw()
 
+
     # Return an anction based on current board status
     def action(self):
         self.round += 1
         best_action = self.board.generate_best_action()
         return best_action
+
 
     # Update the current board of our player
     def update(self, oppo_action, ally_action):
